@@ -12,8 +12,8 @@ use esp_idf_svc::wifi::EspWifi;
 use esp_idf_sys as _; // If using the `binstart` feature of `esp-idf-sys`, always keep this module imported
 use esp_idf_sys::esp_wifi_set_ps;
 use log::*;
-use mini_rdk::esp32::robot::Esp32Robot;
-use mini_rdk::esp32::robot::ResourceType;
+use mini_rdk::common::robot::LocalRobot;
+use mini_rdk::common::robot::ResourceType;
 use mini_rdk::esp32::server::{CloudConfig, Esp32Server};
 use mini_rdk::esp32::tls::Esp32TlsServerConfig;
 use mini_rdk::proto::common::v1::ResourceName;
@@ -71,7 +71,7 @@ fn main() -> anyhow::Result<()> {
 
         let board = Arc::new(Mutex::new(board));
 
-        let mut res: mini_rdk::esp32::robot::ResourceMap = HashMap::with_capacity(1);
+        let mut res: mini_rdk::common::robot::ResourceMap = HashMap::with_capacity(1);
 
         res.insert(
             ResourceName {
@@ -83,7 +83,7 @@ fn main() -> anyhow::Result<()> {
             ResourceType::Board(board),
         );
 
-        Esp32Robot::new(res)
+        LocalRobot::new(res)
     };
 
     let (ip, _wifi) = {
@@ -101,7 +101,7 @@ fn main() -> anyhow::Result<()> {
         )
     };
 
-    let mut cloud_cfg = CloudConfig::new(ROBOT_NAME, FQDN, ROBOT_ID, ROBOT_SECRET);
+    let mut cloud_cfg = CloudConfig::new(ROBOT_NAME, LOCAL_FQDN, FQDN, ROBOT_ID, ROBOT_SECRET);
     cloud_cfg.set_tls_config(cfg);
     let esp32_srv = Esp32Server::new(robot, cloud_cfg);
     esp32_srv.start(ip)?;
