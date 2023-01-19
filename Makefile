@@ -33,4 +33,4 @@ endif
 {% endif %}
 
 upload: cargo-ver
-	cargo espflash flash --monitor --partition-table partitions.csv --baud 460800 -f 80M --use-stub
+	cargo espflash flash --monitor --partition-table partitions.csv --baud 460800 -f 80M --use-stub $(ESPFLASH_FLASH_ARGS)
