@@ -1,5 +1,5 @@
-const SSID: &str = env!("MINI_RDK_WIFI_SSID");
-const PASS: &str = env!("MINI_RDK_WIFI_PASSWORD");
+const SSID: &str = env!("MICRO_RDK_WIFI_SSID");
+const PASS: &str = env!("MICRO_RDK_WIFI_PASSWORD");
 
 // Generated robot config during build process
 include!(concat!(env!("OUT_DIR"), "/robot_secret.rs"));
@@ -12,11 +12,11 @@ use esp_idf_svc::wifi::EspWifi;
 use esp_idf_sys as _; // If using the `binstart` feature of `esp-idf-sys`, always keep this module imported
 use esp_idf_sys::esp_wifi_set_ps;
 use log::*;
-use mini_rdk::common::robot::LocalRobot;
-use mini_rdk::common::robot::ResourceType;
-use mini_rdk::esp32::server::{CloudConfig, Esp32Server};
-use mini_rdk::esp32::tls::Esp32TlsServerConfig;
-use mini_rdk::proto::common::v1::ResourceName;
+use micro_rdk::common::robot::LocalRobot;
+use micro_rdk::common::robot::ResourceType;
+use micro_rdk::esp32::server::{CloudConfig, Esp32Server};
+use micro_rdk::esp32::tls::Esp32TlsServerConfig;
+use micro_rdk::proto::common::v1::ResourceName;
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::rc::Rc;
@@ -43,8 +43,8 @@ fn main() -> anyhow::Result<()> {
         use esp_idf_hal::adc::config::Config;
         use esp_idf_hal::adc::{self, AdcChannelDriver, AdcDriver, Atten11dB};
         use esp_idf_hal::gpio::PinDriver;
-        use mini_rdk::esp32::analog::Esp32AnalogReader;
-        use mini_rdk::esp32::board::EspBoard;
+        use micro_rdk::esp32::analog::Esp32AnalogReader;
+        use micro_rdk::esp32::board::EspBoard;
 
         let pins = vec![PinDriver::output(periph.pins.gpio15)?];
 
@@ -71,7 +71,7 @@ fn main() -> anyhow::Result<()> {
 
         let board = Arc::new(Mutex::new(board));
 
-        let mut res: mini_rdk::common::robot::ResourceMap = HashMap::with_capacity(1);
+        let mut res: micro_rdk::common::robot::ResourceMap = HashMap::with_capacity(1);
 
         res.insert(
             ResourceName {

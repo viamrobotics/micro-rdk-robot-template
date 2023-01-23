@@ -1,7 +1,7 @@
 [template]
 cargo_generate_version = ">=0.10.0"
 ignore = [".git","README.md"]
-description = "Mini-RDK template"
+description = "Micro-Rdk template"
 
 [placeholders.mcu]
 type = "string"
