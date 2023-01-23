@@ -44,7 +44,6 @@ pub struct Cloud {
     pub tls_private_key: String,
 }
 
-// Necessary because of this issue: https://github.com/rust-lang/cargo/issues/9641
 fn main() -> anyhow::Result<()> {
     if std::env::var_os("IDF_PATH").is_none() {
         return Err(anyhow!("You need to run IDF's export.sh before building"));
