@@ -14,7 +14,7 @@ build:
 {% if qemu %}build-qemu:
 	cargo build  --example esp32  --features qemu && cargo espflash save-image --features qemu --merge --chip esp32 target/xtensa-esp32-espidf/debug/debug.bin -T partitions.csv -s 4M  --example esp32
 
-
+a
 sim-local: cargo-ver build-qemu
 ifndef QEMU_ESP32_XTENSA
 	$(error QEMU_ESP32_XTENSA is not set)
