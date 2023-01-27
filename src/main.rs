@@ -42,11 +42,13 @@ fn main() -> anyhow::Result<()> {
     let robot = {
         use esp_idf_hal::adc::config::Config;
         use esp_idf_hal::adc::{self, AdcChannelDriver, AdcDriver, Atten11dB};
+        use esp_idf_hal::gpio::OutputPin;
         use esp_idf_hal::gpio::PinDriver;
+        use micro_rdk::common::analog::AnalogReader;
         use micro_rdk::esp32::analog::Esp32AnalogReader;
         use micro_rdk::esp32::board::EspBoard;
 
-        let pins = vec![PinDriver::output(periph.pins.gpio15)?];
+        let pins = vec![PinDriver::output(periph.pins.gpio18.downgrade_output())?];
 
         let adc1 = Rc::new(RefCell::new(AdcDriver::new(
             periph.adc1,
@@ -57,17 +59,11 @@ fn main() -> anyhow::Result<()> {
             AdcChannelDriver::new(periph.pins.gpio34)?;
         let analog1 = Esp32AnalogReader::new("A1".to_string(), adc_chan, adc1.clone());
 
-        let adc_chan: AdcChannelDriver<_, Atten11dB<adc::ADC1>> =
-            AdcChannelDriver::new(periph.pins.gpio35)?;
-        let analog2 = Esp32AnalogReader::new("A2".to_string(), adc_chan, adc1.clone());
+        let analog_readers: Vec<
+            Rc<RefCell<(dyn AnalogReader<u16, Error = anyhow::Error> + 'static)>>,
+        > = vec![Rc::new(RefCell::new(analog1))];
 
-        let board = EspBoard::new(
-            pins,
-            vec![
-                Rc::new(RefCell::new(analog1)),
-                Rc::new(RefCell::new(analog2)),
-            ],
-        );
+        let board = EspBoard::new(pins, analog_readers);
 
         let board = Arc::new(Mutex::new(board));
 
