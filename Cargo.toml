@@ -26,9 +26,9 @@ camera = []
 anyhow = {version = "1", features = ["backtrace"]}
 embedded-hal = "0.2.7"
 embedded-svc = "0.23"
-esp-idf-hal = "0.39.3"
-esp-idf-svc = { version = "0.43.4" }
-esp-idf-sys = { version = "0.31.11", features = ["binstart"] }
+esp-idf-hal = "0.40.1"
+esp-idf-svc = { version = "0.45.0" }
+esp-idf-sys = { version = "0.32.1", features = ["binstart"] }
 futures-lite = "1.12.0"
 hyper = {version="0.14.20", default-features = false, features = ["server","stream","http2"]}
 log = "0.4"
