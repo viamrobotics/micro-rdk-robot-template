@@ -25,7 +25,7 @@ camera = []
 [dependencies]
 anyhow = {version = "1", features = ["backtrace"]}
 embedded-hal = "0.2.7"
-embedded-svc = "0.23"
+embedded-svc = "0.24"
 esp-idf-hal = "0.40.1"
 esp-idf-svc = { version = "0.45.0" }
 esp-idf-sys = { version = "0.32.1", features = ["binstart"] }
