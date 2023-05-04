@@ -63,7 +63,7 @@ fn main() -> anyhow::Result<()> {
             Rc<RefCell<(dyn AnalogReader<u16, Error = anyhow::Error> + 'static)>>,
         > = vec![Rc::new(RefCell::new(analog1))];
 
-        let board = EspBoard::new(pins, analog_readers);
+        let board = EspBoard::new(pins, analog_readers, HashMap::new());
 
         let board = Arc::new(Mutex::new(board));
 
