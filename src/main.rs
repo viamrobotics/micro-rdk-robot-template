@@ -4,6 +4,13 @@ const PASS: &str = env!("MICRO_RDK_WIFI_PASSWORD");
 // Generated robot config during build process
 include!(concat!(env!("OUT_DIR"), "/robot_secret.rs"));
 
+#[cfg(feature = "staticconf")]
+use micro_rdk::common::config::RobotConfigStatic;
+#[cfg(feature = "staticconf")]
+include!(concat!(env!("OUT_DIR"), "/robot_config.rs"));
+#[cfg(feature = "staticconf")]
+use micro_rdk::common::config::{Kind, StaticComponentConfig};
+
 use anyhow::bail;
 use esp_idf_hal::prelude::Peripherals;
 use esp_idf_svc::eventloop::EspSystemEventLoop;
@@ -13,15 +20,6 @@ use esp_idf_sys as _; // If using the `binstart` feature of `esp-idf-sys`, alway
 use esp_idf_sys::esp_wifi_set_ps;
 use log::*;
 use micro_rdk::common::robot::LocalRobot;
-use micro_rdk::common::robot::ResourceType;
-use micro_rdk::esp32::server::{CloudConfig, Esp32Server};
-use micro_rdk::esp32::tls::Esp32TlsServerConfig;
-use micro_rdk::proto::common::v1::ResourceName;
-use std::cell::RefCell;
-use std::collections::HashMap;
-use std::rc::Rc;
-use std::sync::Arc;
-use std::sync::Mutex;
 use std::time::Duration;
 
 fn main() -> anyhow::Result<()> {
@@ -39,14 +37,22 @@ fn main() -> anyhow::Result<()> {
 
     let periph = Peripherals::take().unwrap();
 
+    #[cfg(not(feature = "staticconf"))]
     let robot = {
         use esp_idf_hal::adc::config::Config;
         use esp_idf_hal::adc::{self, AdcChannelDriver, AdcDriver, Atten11dB};
         use esp_idf_hal::gpio::OutputPin;
         use esp_idf_hal::gpio::PinDriver;
         use micro_rdk::common::analog::AnalogReader;
+        use micro_rdk::common::robot::ResourceType;
         use micro_rdk::esp32::analog::Esp32AnalogReader;
         use micro_rdk::esp32::board::EspBoard;
+        use micro_rdk::proto::common::v1::ResourceName;
+        use std::cell::RefCell;
+        use std::collections::HashMap;
+        use std::rc::Rc;
+        use std::sync::Arc;
+        use std::sync::Mutex;
 
         let pins = vec![PinDriver::output(periph.pins.gpio18.downgrade_output())?];
 
@@ -82,27 +88,98 @@ fn main() -> anyhow::Result<()> {
         LocalRobot::new(res)
     };
 
+    #[cfg(feature = "staticconf")]
+    let robot = {
+        let robot = LocalRobot::new_from_static(&STATIC_ROBOT_CONFIG.unwrap());
+        if robot.is_err() {
+            log::info!(
+                "failure to build robot with {:?}",
+                robot.as_ref().err().unwrap()
+            );
+        }
+        robot.unwrap()
+    };
+
     let (ip, _wifi) = {
         let wifi = start_wifi(periph.modem, sys_loop_stack)?;
         (wifi.sta_netif().get_ip_info()?.ip, wifi)
     };
-    let cfg = {
-        let cert = include_bytes!(concat!(env!("OUT_DIR"), "/ca.crt"));
-        let key = include_bytes!(concat!(env!("OUT_DIR"), "/key.key"));
-        Esp32TlsServerConfig::new(
-            cert.as_ptr(),
-            cert.len() as u32,
-            key.as_ptr(),
-            key.len() as u32,
-        )
-    };
+    #[cfg(not(feature = "webrtc"))]
+    {
+        use micro_rdk::esp32::server::{CloudConfig, Esp32Server};
+        use micro_rdk::esp32::tls::Esp32TlsServerConfig;
+        let cfg = {
+            let cert = include_bytes!(concat!(env!("OUT_DIR"), "/ca.crt"));
+            let key = include_bytes!(concat!(env!("OUT_DIR"), "/key.key"));
+            Esp32TlsServerConfig::new(
+                cert.as_ptr(),
+                cert.len() as u32,
+                key.as_ptr(),
+                key.len() as u32,
+            )
+        };
 
-    let mut cloud_cfg = CloudConfig::new(ROBOT_NAME, LOCAL_FQDN, FQDN, ROBOT_ID, ROBOT_SECRET);
-    cloud_cfg.set_tls_config(cfg);
-    let esp32_srv = Esp32Server::new(robot, cloud_cfg);
-    esp32_srv.start(ip)?;
+        let mut cloud_cfg = CloudConfig::new(ROBOT_NAME, LOCAL_FQDN, FQDN, ROBOT_ID, ROBOT_SECRET);
+        cloud_cfg.set_tls_config(cfg);
+        let esp32_srv = Esp32Server::new(robot, cloud_cfg);
+        esp32_srv.start(ip)?;
+        Ok(())
+    }
 
-    Ok(())
+    #[cfg(feature = "webrtc")]
+    {
+        use futures_lite::future::block_on;
+        use micro_rdk::common::app_client::{AppClientBuilder, AppClientConfig};
+        use micro_rdk::common::grpc::GrpcServer;
+        use micro_rdk::common::grpc_client::GrpcClient;
+        use micro_rdk::common::webrtc::grpc::{WebRtcGrpcBody, WebRtcGrpcServer};
+        use micro_rdk::esp32::certificate::WebRtcCertificate;
+        use micro_rdk::esp32::dtls::Esp32Dtls;
+        use micro_rdk::esp32::exec::Esp32Executor;
+        use micro_rdk::esp32::tcp::Esp32Stream;
+        use micro_rdk::esp32::tls::Esp32Tls;
+        use std::rc::Rc;
+        use std::sync::Arc;
+        use std::sync::Mutex;
+        log::info!("Starting WebRtc ");
+        let cfg = AppClientConfig::new(ROBOT_SECRET.to_owned(), ROBOT_ID.to_owned(), ip);
+        let executor = Esp32Executor::new();
+        let mut webrtc = {
+            let mut tls = Box::new(Esp32Tls::new_client());
+            let conn = tls.open_ssl_context(None).unwrap();
+            let conn = Esp32Stream::TLSStream(Box::new(conn));
+
+            let grpc_client =
+                GrpcClient::new(conn, executor.clone(), "https://app.viam.com:443").unwrap();
+            let mut app_client = AppClientBuilder::new(grpc_client, cfg).build().unwrap();
+
+            let webrtc_certificate = Rc::new(WebRtcCertificate::new(
+                ROBOT_DTLS_CERT,
+                ROBOT_DTLS_KEY_PAIR,
+                ROBOT_DTLS_CERT_FP,
+            ));
+
+            let dtls = Esp32Dtls::new(webrtc_certificate.clone()).unwrap();
+
+            let webrtc = app_client
+                .connect_webrtc(webrtc_certificate, executor.clone(), dtls)
+                .unwrap();
+
+            drop(app_client);
+            webrtc
+        };
+        let channel = block_on(executor.run(async { webrtc.open_data_channel().await })).unwrap();
+        log::info!("channel opened {:?}", channel);
+
+        let mut webrtc_grpc = WebRtcGrpcServer::new(
+            channel,
+            GrpcServer::new(Arc::new(Mutex::new(robot)), WebRtcGrpcBody::default()),
+        );
+
+        loop {
+            block_on(executor.run(async { webrtc_grpc.next_request().await })).unwrap();
+        }
+    }
 }
 
 fn start_wifi(
