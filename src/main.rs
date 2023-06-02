@@ -41,7 +41,7 @@ fn main() -> anyhow::Result<()> {
     let robot = {
         use esp_idf_hal::adc::config::Config;
         use esp_idf_hal::adc::{self, AdcChannelDriver, AdcDriver, Atten11dB};
-        use esp_idf_hal::gpio::OutputPin;
+        use esp_idf_hal::gpio::IOPin;
         use esp_idf_hal::gpio::PinDriver;
         use micro_rdk::common::analog::AnalogReader;
         use micro_rdk::common::robot::ResourceType;
@@ -54,7 +54,9 @@ fn main() -> anyhow::Result<()> {
         use std::sync::Arc;
         use std::sync::Mutex;
 
-        let pins = vec![PinDriver::output(periph.pins.gpio18.downgrade_output())?];
+        let pins = vec![
+            PinDriver::input_output(periph.pins.gpio18.downgrade())?,
+        ];
 
         let adc1 = Rc::new(RefCell::new(AdcDriver::new(
             periph.adc1,
