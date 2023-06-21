@@ -64,7 +64,7 @@ fn main() -> anyhow::Result<()> {
 
     {% if pwd != ""  %}println!("cargo:rustc-env=MICRO_RDK_WIFI_PASSWORD={{pwd}}"); {% else %}
     if std::env::var_os("MICRO_RDK_WIFI_PASSWORD").is_none() {
-        return Err(anyhow!(
+        return Err(anyhow::anyhow!(
             "please set the password for WiFi {}",
             std::env::var_os("MICRO_RDK_WIFI_SSID")
                 .unwrap()
