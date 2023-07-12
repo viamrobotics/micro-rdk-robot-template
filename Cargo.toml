@@ -10,7 +10,7 @@ esp-idf-sys = {git = "https://github.com/npmenard/esp-idf-sys.git"}
 polling = { git = "https://github.com/esp-rs-compat/polling" }
 smol = { git = "https://github.com/esp-rs-compat/smol" }
 socket2 = { git = "https://github.com/npmenard/socket2.git" }
-
+async-io = {git = "https://github.com/npmenard/async-io.git"}
 
 [profile.release]
 opt-level = "s"
@@ -19,20 +19,18 @@ opt-level = "s"
 debug = true # Symbols are nice and they don't increase the size on Flash
 opt-level = "z"
 
-[features]
-qemu = []
-camera = []
-staticconf = []
 
 [dependencies]
+esp-idf-sys = { version = "0.33.1", features = ["binstart"] }
 anyhow = {version = "1", features = ["backtrace"]}
-embedded-hal = "0.2.7"
-embedded-svc = "0.24"
-esp-idf-hal = "0.40.1"
-esp-idf-svc = { version = "0.45.0" }
-esp-idf-sys = { version = "0.32.1", features = ["binstart"] }
+embedded-svc = "0.25.1"
+embedded-hal = { version = "0.2.7", features = ["unproven"]}
+esp-idf-svc = { version = "0.46.0", features = ["experimental"] }
+esp-idf-hal = "0.41.1"
 log = "0.4"
-phf = { version = "0.11", features = ["macros"] }
+async-channel = "1.8.0"
+smol = "1.2"
+futures-lite = "1.12.0"
 micro-rdk = {git = "https://github.com/viamrobotics/micro-rdk.git", features = ["esp32"]}
 
 [build-dependencies]

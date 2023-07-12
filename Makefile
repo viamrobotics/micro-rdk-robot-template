@@ -9,28 +9,18 @@ ifeq "$(ESPFLASHVERSION)" "1"
 endif
 
 build:
-	cargo build
-
-{% if qemu %}build-qemu:
-	cargo build  --example esp32  --features qemu && cargo espflash save-image --features qemu --merge --chip esp32 target/xtensa-esp32-espidf/debug/debug.bin -T partitions.csv -s 4M  --example esp32
-
-
-sim-local: cargo-ver build-qemu
-ifndef QEMU_ESP32_XTENSA
-	$(error QEMU_ESP32_XTENSA is not set)
-endif
-	pkill qemu || true
-	$(QEMU_ESP32_XTENSA)/qemu-system-xtensa -nographic -machine esp32 -gdb tcp::3334 -nic user,model=open_eth,hostfwd=tcp::7888-:80 -drive file=target/xtensa-esp32-espidf/debug/debug.bin,if=mtd,format=raw
-
-# debug-local is identical to sim-local, except the `-S` at the end means "wait until a debugger is
-# attached before starting."
-debug-local: cargo-ver build-qemu
-ifndef QEMU_ESP32_XTENSA
-	$(error QEMU_ESP32_XTENSA is not set)
-endif
-	pkill qemu || true
-	$(QEMU_ESP32_XTENSA)/qemu-system-xtensa -nographic -machine esp32 -gdb tcp::3334 -nic user,model=open_eth,hostfwd=tcp::7888-:80 -drive file=target/xtensa-esp32-espidf/debug/debug.bin,if=mtd,format=raw -S
-{% endif %}
+	cargo build --release
 
 upload: cargo-ver
 	cargo espflash flash --monitor --partition-table partitions.csv --baud 460800 -f 80M --use-stub --release $(ESPFLASH_FLASH_ARGS)
+
+
+build-esp32-bin:
+	cargo espflash save-image --merge --chip esp32 target/esp32-server.bin --partition-table partitions.csv -s 4M  --release
+
+flash-esp32-bin:
+ifneq (,$(wildcard target/esp32-server.bin))
+	espflash write-bin 0x0 target/esp32-server.bin -b 460800  && sleep 2 && espflash monitor
+else
+	$(error esp32-server.bin not found, run build-esp32-bin first)
+endif
