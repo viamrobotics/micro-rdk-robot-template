@@ -1,17 +1,9 @@
 .PHONY: build
 
-SHELL := /bin/bash
-ESPFLASHVERSION = $(shell expr `cargo espflash -V | grep ^cargo-espflash | sed 's/^.* //g' | cut -f1 -d. ` \< 2)
-
-cargo-ver:
-ifeq "$(ESPFLASHVERSION)" "1"
-		$(error Update espfash to version >2.0. Update with cargo install cargo-espflash@2.0.0-rc.1)
-endif
-
 build:
 	cargo build --release
 
-upload: cargo-ver
+upload:
 	cargo espflash flash --monitor --partition-table partitions.csv --baud 460800 -f 80M --use-stub --release $(ESPFLASH_FLASH_ARGS)
 
 
