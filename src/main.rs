@@ -51,14 +51,9 @@ fn main() -> anyhow::Result<()> {
         WebRtcCertificate::new(ROBOT_DTLS_CERT, ROBOT_DTLS_KEY_PAIR, ROBOT_DTLS_CERT_FP);
 
     let tls_cfg = {
-        let cert = include_bytes!(concat!(env!("OUT_DIR"), "/ca.crt"));
-        let key = include_bytes!(concat!(env!("OUT_DIR"), "/key.key"));
-        Esp32TlsServerConfig::new(
-            cert.as_ptr(),
-            cert.len() as u32,
-            key.as_ptr(),
-            key.len() as u32,
-        )
+        let cert = &[ROBOT_SRV_PEM_CHAIN, ROBOT_SRV_PEM_CA];
+        let key = ROBOT_SRV_DER_KEY;
+        Esp32TlsServerConfig::new(cert, key.as_ptr(), key.len() as u32)
     };
 
     serve_web(cfg, tls_cfg, None, ip, webrtc_certificate);
