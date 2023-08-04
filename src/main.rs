@@ -8,7 +8,7 @@ use log::*;
 
 use esp_idf_svc::eventloop::EspSystemEventLoop;
 use micro_rdk::{
-    common::app_client::AppClientConfig,
+    common::{app_client::AppClientConfig, entry::RobotRepresentation, registry::ComponentRegistry},
     esp32::{certificate::WebRtcCertificate, entry::serve_web, tls::Esp32TlsServerConfig},
 };
 use {
@@ -56,7 +56,9 @@ fn main() -> anyhow::Result<()> {
         Esp32TlsServerConfig::new(cert, key.as_ptr(), key.len() as u32)
     };
 
-    serve_web(cfg, tls_cfg, None, ip, webrtc_certificate);
+    let repr = RobotRepresentation::WithRegistry(ComponentRegistry::default());
+
+    serve_web(cfg, tls_cfg, repr, ip, webrtc_certificate);
     Ok(())
 }
 
