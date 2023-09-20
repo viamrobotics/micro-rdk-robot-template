@@ -8,7 +8,9 @@ use log::*;
 
 use esp_idf_svc::eventloop::EspSystemEventLoop;
 use micro_rdk::{
-    common::{app_client::AppClientConfig, entry::RobotRepresentation, registry::ComponentRegistry},
+    common::{
+        app_client::AppClientConfig, entry::RobotRepresentation, registry::ComponentRegistry,
+    },
     esp32::{certificate::WebRtcCertificate, entry::serve_web, tls::Esp32TlsServerConfig},
 };
 use {
@@ -47,11 +49,14 @@ fn main() -> anyhow::Result<()> {
         ip,
         "".to_owned(),
     );
-    let webrtc_certificate =
-        WebRtcCertificate::new(ROBOT_DTLS_CERT, ROBOT_DTLS_KEY_PAIR, ROBOT_DTLS_CERT_FP);
+    let webrtc_certificate = WebRtcCertificate::new(
+        ROBOT_DTLS_CERT.to_vec(),
+        ROBOT_DTLS_KEY_PAIR.to_vec(),
+        ROBOT_DTLS_CERT_FP,
+    );
 
     let tls_cfg = {
-        let cert = &[ROBOT_SRV_PEM_CHAIN, ROBOT_SRV_PEM_CA];
+        let cert = [ROBOT_SRV_PEM_CHAIN.to_vec(), ROBOT_SRV_PEM_CA.to_vec()];
         let key = ROBOT_SRV_DER_KEY;
         Esp32TlsServerConfig::new(cert, key.as_ptr(), key.len() as u32)
     };
