@@ -9,7 +9,7 @@ use log::*;
 use esp_idf_svc::eventloop::EspSystemEventLoop;
 use micro_rdk::{
     common::{
-        app_client::AppClientConfig, entry::RobotRepresentation, registry::ComponentRegistry,
+        app_client::AppClientConfig, entry::RobotRepresentation, registry::{ComponentRegistry, RegistryError},
     },
     esp32::{certificate::WebRtcCertificate, entry::serve_web, tls::Esp32TlsServerConfig},
 };
@@ -23,6 +23,21 @@ use {
     esp_idf_sys as _,
     esp_idf_sys::esp_wifi_set_ps,
 };
+
+macro_rules! generate_register_modules {
+    ($($module:ident),*) => {
+        #[allow(unused_variables)]
+        fn register_modules(registry: &mut ComponentRegistry) -> anyhow::Result<(), RegistryError> {
+            $(
+                log::info!("registering micro-rdk module '{}'", stringify!($module));
+                $module::register_models(registry)?;
+            )*
+                Ok(())
+        }
+    }
+}
+
+include!(concat!(env!("OUT_DIR"), "/modules.rs"));
 
 fn main() -> anyhow::Result<()> {
     esp_idf_sys::link_patches();
@@ -61,7 +76,9 @@ fn main() -> anyhow::Result<()> {
         Esp32TlsServerConfig::new(cert, key.as_ptr(), key.len() as u32)
     };
 
-    let repr = RobotRepresentation::WithRegistry(ComponentRegistry::default());
+    let mut registry = Box::new(ComponentRegistry::default());
+    register_modules(&mut registry)?;
+    let repr = RobotRepresentation::WithRegistry(registry);
 
     serve_web(cfg, tls_cfg, repr, ip, webrtc_certificate);
     Ok(())

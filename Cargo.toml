@@ -35,6 +35,7 @@ micro-rdk = {git = "https://github.com/viamrobotics/micro-rdk.git", features = [
 
 [build-dependencies]
 anyhow = "1"
+cargo_metadata = "0.18.1"
 const-gen = "1.3.0"
 embuild = "0.29"
 gethostname = "0.4.1"
