@@ -161,7 +161,7 @@ fn main() -> anyhow::Result<()> {
         ),
     ]
     .join("\n");
-    fs::write(&dest_path, robot_decl).unwrap();
+    fs::write(dest_path, robot_decl).unwrap();
 
     let components_config = robot_cfg
         .components
@@ -184,7 +184,7 @@ fn main() -> anyhow::Result<()> {
         )]
     }
     .join("\n");
-    fs::write(&dest_path, conf_decl).unwrap();
+    fs::write(dest_path, conf_decl).unwrap();
 
     let metadata = MetadataCommand::new()
         .manifest_path("Cargo.toml")
@@ -216,10 +216,10 @@ fn main() -> anyhow::Result<()> {
         .collect();
 
     let mut modules_rs_content = String::new();
-    let module_name_seq = viam_modules.iter().map(|m| m.name.replace("-", "_")).collect::<Vec<_>>().join(", \n\t");
-    modules_rs_content.push_str(&format!("generate_register_modules!(\n\t{}\n);\n", module_name_seq));
+    let module_name_seq = viam_modules.iter().map(|m| m.name.replace('-', "_")).collect::<Vec<_>>().join(", \n\t");
+    modules_rs_content.push_str(&format!("generate_register_modules!(\n\t{module_name_seq}\n);\n"));
     let dest_path = Path::new(&out_dir).join("modules.rs");
-    fs::write(&dest_path, modules_rs_content).unwrap();
+    fs::write(dest_path, modules_rs_content).unwrap();
 
     Ok(())
 }
@@ -243,7 +243,7 @@ fn generate_dtls_certificate() -> anyhow::Result<(Vec<u8>, Vec<u8>, String)> {
     let fp = ring::digest::digest(&ring::digest::SHA256, &cert_der)
         .as_ref()
         .iter()
-        .map(|b| format!("{:02X}", b))
+        .map(|b| format!("{b:02X}"))
         .collect::<Vec<String>>()
         .join(":");
     let fp = String::from("sha-256") + " " + &fp;
@@ -318,7 +318,7 @@ impl const_gen::CompileConst for StaticRobotConfig {
         } else {
             obj.push_str("None");
         }
-        format!("RobotConfigStatic {{components: {}}}", obj)
+        format!("RobotConfigStatic {{components: {obj}}}")
     }
 }
 
@@ -356,7 +356,7 @@ impl const_gen::CompileConst for Kind {
                 obj.push_str(&format!("BoolValue({})", v.const_val()));
             }
         }
-        format!("Kind::{}", obj)
+        format!("Kind::{obj}")
     }
 }
 
@@ -377,7 +377,7 @@ impl const_gen::CompileConst for ComponentConfig {
             )),
             None => obj.push_str("None"),
         };
-        format!("StaticComponentConfig {{{}}}", obj)
+        format!("StaticComponentConfig {{{obj}}}")
     }
 }
 

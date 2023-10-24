@@ -76,7 +76,7 @@ fn main() -> anyhow::Result<()> {
         Esp32TlsServerConfig::new(cert, key.as_ptr(), key.len() as u32)
     };
 
-    let mut registry = Box::new(ComponentRegistry::default());
+    let mut registry = Box::<ComponentRegistry>::default();
     register_modules(&mut registry)?;
     let repr = RobotRepresentation::WithRegistry(registry);
 
