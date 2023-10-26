@@ -827,6 +827,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "cargo_metadata"
+version = "0.18.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2d886547e41f740c616ae73108f6eb70afe6d940c7bc697cb30f13daec073037"
+dependencies = [
+ "camino",
+ "cargo-platform",
+ "semver",
+ "serde",
+ "serde_json",
+ "thiserror",
+]
+
+[[package]]
 name = "cc"
 version = "1.0.83"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1763,7 +1777,7 @@ dependencies = [
  "anyhow",
  "bindgen",
  "build-time",
- "cargo_metadata",
+ "cargo_metadata 0.15.4",
  "const_format",
  "embuild 0.31.3",
  "envy",
@@ -2717,8 +2731,8 @@ dependencies = [
 
 [[package]]
 name = "micro-rdk"
-version = "0.0.1"
-source = "git+https://github.com/viamrobotics/micro-rdk.git#bf9ef789f1ec33c2a4db5e734119dc5e2a2c62b3"
+version = "0.0.3"
+source = "git+https://github.com/viamrobotics/micro-rdk.git#0007bea893092dcd3f5ba862c112df3142403142"
 dependencies = [
  "anyhow",
  "async-channel",
@@ -2726,6 +2740,7 @@ dependencies = [
  "base64 0.21.4",
  "bytecodec",
  "bytes",
+ "chrono",
  "const-gen",
  "either",
  "embedded-hal 0.2.7",
@@ -2734,6 +2749,7 @@ dependencies = [
  "esp-idf-hal",
  "esp-idf-svc",
  "esp-idf-sys",
+ "futures",
  "futures-lite",
  "h2",
  "hyper",
@@ -2743,7 +2759,6 @@ dependencies = [
  "phf",
  "pin-project-lite 0.2.13",
  "prost 0.11.9",
- "prost-types 0.11.9",
  "rand",
  "sctp-proto",
  "sdp",
@@ -4396,36 +4411,6 @@ dependencies = [
  "redox_syscall 0.3.5",
  "rustix 0.38.14",
  "windows-sys 0.48.0",
-]
-
-[[package]]
-name = "teste"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "async-channel",
- "const-gen",
- "der 0.7.8",
- "embedded-hal 0.2.7",
- "embedded-svc",
- "embuild 0.29.3",
- "esp-idf-hal",
- "esp-idf-svc",
- "esp-idf-sys",
- "futures-lite",
- "gethostname",
- "local-ip-address",
- "log 0.4.20",
- "micro-rdk",
- "prost-types 0.11.9",
- "rcgen",
- "ring",
- "serde",
- "serde_json",
- "smol",
- "tokio",
- "viam",
- "viam-rust-utils",
 ]
 
 [[package]]

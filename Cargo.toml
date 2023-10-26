@@ -31,7 +31,7 @@ log = "0.4"
 async-channel = "1.8.0"
 smol = "1.2"
 futures-lite = "1.12.0"
-micro-rdk = {git = "https://github.com/viamrobotics/micro-rdk.git", features = ["esp32"]}
+micro-rdk = {version = "0.0.3", git = "https://github.com/viamrobotics/micro-rdk.git", features = ["esp32"]}
 
 [build-dependencies]
 anyhow = "1"
