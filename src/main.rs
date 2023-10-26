@@ -7,9 +7,12 @@ include!(concat!(env!("OUT_DIR"), "/robot_secret.rs"));
 use log::*;
 
 use esp_idf_svc::eventloop::EspSystemEventLoop;
+use esp_idf_sys::{g_wifi_feature_caps, CONFIG_FEATURE_CACHE_TX_BUF_BIT};
 use micro_rdk::{
     common::{
-        app_client::AppClientConfig, entry::RobotRepresentation, registry::{ComponentRegistry, RegistryError},
+        app_client::AppClientConfig,
+        entry::RobotRepresentation,
+        registry::{ComponentRegistry, RegistryError},
     },
     esp32::{certificate::WebRtcCertificate, entry::serve_web, tls::Esp32TlsServerConfig},
 };
@@ -39,6 +42,10 @@ macro_rules! generate_register_modules {
 
 include!(concat!(env!("OUT_DIR"), "/modules.rs"));
 
+extern "C" {
+    pub static g_spiram_ok: bool;
+}
+
 fn main() -> anyhow::Result<()> {
     esp_idf_sys::link_patches();
 
@@ -53,6 +60,13 @@ fn main() -> anyhow::Result<()> {
     }
 
     let periph = Peripherals::take().unwrap();
+
+    unsafe {
+        if !g_spiram_ok {
+            log::info!("spiram not initialized disabling cache feature of the wifi driver");
+            g_wifi_feature_caps &= !(CONFIG_FEATURE_CACHE_TX_BUF_BIT as u64);
+        }
+    }
 
     let (ip, _wifi) = {
         let wifi = start_wifi(periph.modem, sys_loop_stack)?;
