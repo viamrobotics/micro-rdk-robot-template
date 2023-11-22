@@ -397,7 +397,7 @@ dependencies = [
 [[package]]
 name = "async-io"
 version = "1.12.0"
-source = "git+https://github.com/npmenard/async-io.git#d12fa2912ea7dc834e4d5da393df82244416b177"
+source = "git+https://github.com/viamrobotics/async-io.git#d12fa2912ea7dc834e4d5da393df82244416b177"
 dependencies = [
  "async-lock",
  "autocfg",
@@ -1772,7 +1772,7 @@ dependencies = [
 [[package]]
 name = "esp-idf-sys"
 version = "0.33.1"
-source = "git+https://github.com/npmenard/esp-idf-sys.git#f8c368678af6b8c337f7c2f0380895e919547e00"
+source = "git+https://github.com/viamrobotics/esp-idf-sys.git#f8c368678af6b8c337f7c2f0380895e919547e00"
 dependencies = [
  "anyhow",
  "bindgen",
@@ -2731,8 +2731,8 @@ dependencies = [
 
 [[package]]
 name = "micro-rdk"
-version = "0.0.3"
-source = "git+https://github.com/viamrobotics/micro-rdk.git#0007bea893092dcd3f5ba862c112df3142403142"
+version = "0.1.4"
+source = "git+https://github.com/viamrobotics/micro-rdk.git#c20b58725963674280e30a11414ce749fb97d76b"
 dependencies = [
  "anyhow",
  "async-channel",
@@ -4216,7 +4216,7 @@ dependencies = [
 [[package]]
 name = "socket2"
 version = "0.4.9"
-source = "git+https://github.com/npmenard/socket2.git#d0d0e42260b5582cf94e2fe611fc2399c7ef9223"
+source = "git+https://github.com/viamrobotics/socket2.git#d0d0e42260b5582cf94e2fe611fc2399c7ef9223"
 dependencies = [
  "libc",
  "winapi",
@@ -4335,7 +4335,7 @@ dependencies = [
 [[package]]
 name = "stun_codec"
 version = "0.3.0"
-source = "git+https://github.com/npmenard/stun_codec#71071a433bdfccc896289cde8c83f3e271a7ae12"
+source = "git+https://github.com/viamrobotics/stun_codec#71071a433bdfccc896289cde8c83f3e271a7ae12"
 dependencies = [
  "bytecodec",
  "byteorder",
