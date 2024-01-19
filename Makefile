@@ -4,11 +4,11 @@ build:
 	cargo build --release
 
 upload:
-	cargo espflash flash --monitor --partition-table partitions.csv --baud 460800 -f 80M --use-stub --release $(ESPFLASH_FLASH_ARGS)
+	cargo espflash flash --monitor --partition-table partitions.csv --baud 460800 -f 80mhz --release $(ESPFLASH_FLASH_ARGS)
 
 
 build-esp32-bin:
-	cargo espflash save-image --merge --chip esp32 target/esp32-server.bin --partition-table partitions.csv -s 4M  --release
+	cargo espflash save-image --merge --chip esp32 target/esp32-server.bin --partition-table partitions.csv -s 4mb  --release
 
 flash-esp32-bin:
 ifneq (,$(wildcard target/esp32-server.bin))
